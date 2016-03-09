@@ -1,0 +1,3 @@
+V2 Motor Controller
+The second of the version motor controller will be developed after the first motor controller has been used to verify the function
+of the solenoids. The second version aims to add the feature of PWM (Pulse-Width Modulation) control.
