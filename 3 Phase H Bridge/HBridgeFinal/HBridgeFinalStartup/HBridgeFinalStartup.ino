@@ -1,4 +1,3 @@
-
 volatile int A, B, C;
 int off_pwm;
 double dutyCyclePercentage;
@@ -37,10 +36,6 @@ void setup()
   //port D controls pin 0-7
   DDRD = B11111100;  // sets Arduino pins 2 - 7 as outputs
   
-//  StartupSequence(100);
- // StartupSequence(100);
- // StartupSequence(100);
- //
   StartupSequence(25);
   StartupSequence(25);
   StartupSequence(10);
@@ -56,21 +51,8 @@ void loop() {
   // This is where we take our PWM value
   
     // put your main code here, to run repeatedly:
-  
-          if (Serial.available() > 0) {
-                // read the incoming byte:
-                //Also remember, our duty input to our P type mosfet is a active low!
-                dutyRaw = Serial.parseInt();
-                duty_cycle = 255 - dutyRaw;
-                dutyCyclePercentage = ((double)dutyRaw / 255.0) * 100.0;
-                
-                
-                // say what you got:
-                Serial.print("Duty Cycle: ");
-       
-                Serial.println(dutyCyclePercentage, DEC);
-
-        }
+  parseInteger();
+ 
          
   
 }  
@@ -78,34 +60,27 @@ void loop() {
 
 void StartupSequence(int startupDelay){
   
-  Serial.println("Startup Sequence");
   
   //Phase 1
-  Serial.println("Startup Sequence phase 1");
    PORTD = B01110000;
    delay (startupDelay);
   
  //Phase 2
-  Serial.println("Startup Sequence phase 2");
    PORTD = B00111000;
    delay (startupDelay);
   
  //Phase 3
- Serial.println("Startup Sequence phase 3");
    PORTD = B00101100;
    delay (startupDelay);
   
  //Phase 4
- Serial.println("Startup Sequence phase 4");
    PORTD = B01001100;   
    delay (startupDelay);
    
  //Phase 5
-  Serial.println("Startup Sequence phase 5");
    PORTD = B11001000;
    delay (startupDelay);
  //Phase 6
- Serial.println("Startup Sequence phase 6");
    PORTD = B11100000;
    delay (startupDelay);
    
@@ -127,6 +102,51 @@ void InitialiseInterrupt(){
   sei();		// turn interrupts back on
   
   Serial.println("initialize interrupt");
+}
+
+void parseInteger(){
+  
+  if(dutyRaw != 0){
+  
+                if (Serial.available() > 0) {
+                // read the incoming byte:
+                //Also remember, our duty input to our P type mosfet is a active low!
+                dutyRaw = Serial.parseInt();
+                duty_cycle = 255 - dutyRaw;
+                dutyCyclePercentage = ((double)dutyRaw / 255.0) * 100.0;
+                
+                
+                // say what you got:
+                Serial.print("Duty Cycle: ");
+       
+                Serial.println(dutyCyclePercentage, DEC);
+                                            }
+
+  }
+  
+  else if (dutyRaw == 0){
+    
+    // read the incoming byte:
+                //Also remember, our duty input to our P type mosfet is a active low!
+                dutyRaw = Serial.parseInt();
+                duty_cycle = 255 - dutyRaw;
+                dutyCyclePercentage = ((double)dutyRaw / 255.0) * 100.0;
+                
+                
+                // say what you got:
+                Serial.print("Duty Cycle: ");
+       
+                Serial.println(dutyCyclePercentage, DEC);
+                                            
+  if(dutyRaw != 0){
+     	// switch interrupts off while messing with their settings  
+      StartupSequence(25);
+                // turn interrupts back on after startup sequence.
+    
+                  } 
+  }   
+    
+  
 }
 
 ISR(PCINT1_vect) {    // Interrupt service routine. Every single PCINT8..14 (=ADC0..5) change
@@ -152,26 +172,20 @@ ISR(PCINT1_vect) {    // Interrupt service routine. Every single PCINT8..14 (=AD
   {
    PORTD = B01110000; 
    analogWrite(A_high, duty_cycle);
-   analogWrite(B_high, off_pwm);
-   analogWrite(C_high, off_pwm);
   }
   
   //Phase 2
    else if((A == 0) && (B == 0) && (C == 1))
   {  
    PORTD = B00111000;
-   analogWrite(A_high, off_pwm);
-   analogWrite(B_high, off_pwm);
    analogWrite(C_high, duty_cycle);
    
   }
   
   //Phase 3
    else if((A == 0) && (B == 0) && (C == 0))
-  {   
+  {    
    PORTD = B00101100;
-   analogWrite(A_high, off_pwm);
-   analogWrite(B_high, off_pwm);
    analogWrite(C_high, duty_cycle);
   }
   
@@ -179,18 +193,14 @@ ISR(PCINT1_vect) {    // Interrupt service routine. Every single PCINT8..14 (=AD
    else if((A == 1) && (B == 0) && (C == 0))
   {  
    PORTD = B01001100;   
-   analogWrite(A_high, off_pwm);
    analogWrite(B_high, duty_cycle);
-   analogWrite(C_high, off_pwm);
   }
   
   //Phase 5
    else if((A == 1) && (B == 1) && (C == 0))
   {  
    PORTD = B11001000;
-   analogWrite(A_high, off_pwm);
    analogWrite(B_high, duty_cycle);
-   analogWrite(C_high, off_pwm);
   }
   
   //Phase 6
@@ -198,14 +208,7 @@ ISR(PCINT1_vect) {    // Interrupt service routine. Every single PCINT8..14 (=AD
   {  
    PORTD = B11100000;
    analogWrite(A_high, duty_cycle);
-   analogWrite(B_high, off_pwm);
-   analogWrite(C_high, off_pwm);
   }
   
-  else
-  {
-   Serial.print("You shouldn't be here"); 
-  }
-
   
 }
