@@ -43,7 +43,7 @@ void setup()
   //Initialize all inputs as off
   PORTD = B0101000;
   
-  //Initialize our duty cycle as 100%
+  //Initialize our duty cycle as 0%
   //Remember we are switching the P Mosfets high so these are active
   dutyCycle = 0;
   
@@ -61,7 +61,7 @@ void setup()
 
 void loop() {
   
-  dutyCycle = (255.0/1023.0)*analogRead(A5);
+  dutyCycle = 255 - ((255.0/1023.0)*analogRead(A5)); 
   //Serial.print("\n");
   //Serial.print(dutyCycle);
   
@@ -84,7 +84,8 @@ void InitialiseInterrupt(){
 ISR(PCINT1_vect) {    // Interrupt service routine. Every single PCINT8..14 (=ADC0..5) change
             // will generate an interrupt: but this will always be the same interrupt routine
               
-                
+               
+  
   A = digitalRead(A0);
   B = digitalRead(A1);
   C = digitalRead(A2);
@@ -97,6 +98,8 @@ ISR(PCINT1_vect) {    // Interrupt service routine. Every single PCINT8..14 (=AD
   //float voltage = sensorValue *(5.0/1023.0);
   //We need to scale this voltage then to a max value of 255 
   //dutyCycle = voltage*51;
+  
+  
   
   
   
@@ -141,7 +144,7 @@ ISR(PCINT1_vect) {    // Interrupt service routine. Every single PCINT8..14 (=AD
   
    else if((A == 1) && (B == 0) && (C == 0))
   {
-  //Serial.print("Phase 4 \n");
+   //Serial.print("Phase 4 \n");
    //A high, B Low
    analogWrite(C_high,offPwm);
    PORTD = B01110000;
@@ -158,7 +161,7 @@ ISR(PCINT1_vect) {    // Interrupt service routine. Every single PCINT8..14 (=AD
   
    else if((A == 0) && (B == 0) && (C == 1))
   {
-   //Serial.print("Phase 6 \n");
+  //Serial.print("Phase 6 \n");
    //B High, C Low
    analogWrite(A_high, offPwm);
    PORTD = B11001000;
